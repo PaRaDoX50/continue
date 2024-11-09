@@ -1,37 +1,38 @@
-class Calculator {
-  constructor() {
-    this.result = 0;
-  }
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:scapia_cards/screens/base/network/scapia_errors.dart';
+import 'package:scapia_cards/screens/scapia_badges_gamification/models/badge_progress_model.dart';
+import 'package:scapia_cards/screens/scapia_badges_gamification/service/gamification_service.dart';
 
-  add(number) {
-    this.result += number;
-    return this;
-  }
+class BadgeProgressController extends GetxController {
+  BadgeProgressController({ GamificationService? gamificationService, required this.badgeId})
+      : _gamificationService =
+  gamificationService ?? Get.put(GamificationService());
 
-  subtract(number) {
-    this.result -= number;
-    return this;
-  }
+  final GamificationService _gamificationService;
+  final String badgeId;
+Rx < BadgeProgressModel ?> badgeProgressResponse = Rx(null);
+Rx < bool > isLoading = false.obs;
+Rx < ScapiaNetworkErrorResponse ?> progressError = Rx(null);
 
-  multiply(number) {
-    this.result *= number;
-    return this;
-  }
+@override
+void onInit() {
+  super.onInit();
+  getBadgeProgress(badgeId);
+}
 
-  divide(number) {
-    if (number === 0) {
-      throw new Error("Cannot divide by zero");
-    }
-    this.result /= number;
-    return this;
-  }
+getBadgeProgress(String badgeId) {
+  isLoading.value = true;
+  _gamificationService
+    .getBadgeProgress(badgeId)
+    .then((value) {
+      badgeProgressResponse.value = value;
+      isLoading.value = false;
+    }).catchError((error) {
+      progressError.value = error;
+      isLoading.value = false;
+    });
+}
 
-  getResult() {
-    return this.result;
-  }
-
-  reset() {
-    this.result = 0;
-    return this;
-  }
+  
 }

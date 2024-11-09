@@ -13,15 +13,15 @@ interface AutocompleteTemplate {
     snippets: AutocompleteSnippet[],
   ) => [string, string];
   template:
-    | string
-    | ((
-        prefix: string,
-        suffix: string,
-        filepath: string,
-        reponame: string,
-        language: string,
-        snippets: AutocompleteSnippet[],
-      ) => string);
+  | string
+  | ((
+    prefix: string,
+    suffix: string,
+    filepath: string,
+    reponame: string,
+    language: string,
+    snippets: AutocompleteSnippet[],
+  ) => string);
   completionOptions?: Partial<CompletionOptions>;
 }
 
@@ -89,8 +89,7 @@ const codestralMultifileFimTemplate: AutocompleteTemplate = {
       .map((snippet, i) => `+++++ ${relativePaths[i]}\n${snippet.contents}`)
       .join("\n\n");
     return [
-      `${otherFiles}\n\n+++++ ${
-        relativePaths[relativePaths.length - 1]
+      `${otherFiles}\n\n+++++ ${relativePaths[relativePaths.length - 1]
       }\n${prefix}`,
       suffix,
     ];
@@ -139,11 +138,11 @@ const starcoder2FimTemplate: AutocompleteTemplate = {
       snippets.length === 0
         ? ""
         : `<file_sep>${snippets
-            .map((snippet) => {
-              return snippet.contents;
-              // return `${getBasename(snippet.filepath)}\n${snippet.contents}`;
-            })
-            .join("<file_sep>")}<file_sep>`;
+          .map((snippet) => {
+            return snippet.contents;
+            // return `${getBasename(snippet.filepath)}\n${snippet.contents}`;
+          })
+          .join("<file_sep>")}<file_sep>`;
 
     const prompt = `${otherFiles}<fim_prefix>${prefix}<fim_suffix>${suffix}<fim_middle>`;
     return prompt;
@@ -193,9 +192,8 @@ const codegeexFimTemplate: AutocompleteTemplate = {
       ...snippets.map((snippet) => snippet.filepath),
       filepath,
     ]);
-    const baseTemplate = `###PATH:${
-      relativePaths[relativePaths.length - 1]
-    }\n###LANGUAGE:${language}\n###MODE:BLOCK\n<|code_suffix|>${suffix}<|code_prefix|>${prefix}<|code_middle|>`;
+    const baseTemplate = `###PATH:${relativePaths[relativePaths.length - 1]
+      }\n###LANGUAGE:${language}\n###MODE:BLOCK\n<|code_suffix|>${suffix}<|code_prefix|>${prefix}<|code_middle|>`;
     if (snippets.length === 0) {
       return `<|user|>\n${baseTemplate}<|assistant|>\n`;
     }

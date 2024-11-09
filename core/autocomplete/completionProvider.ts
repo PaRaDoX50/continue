@@ -351,6 +351,9 @@ export class CompletionProvider {
 
       const outcome = await this.getTabCompletion(token, options, llm, input);
 
+      console.log("outputt")
+      console.log(outcome)
+
       if (!outcome?.completion) {
         return undefined;
       }
@@ -494,11 +497,10 @@ export class CompletionProvider {
 
     if (input.injectDetails) {
       const lines = fullPrefix.split("\n");
-      fullPrefix = `${lines.slice(0, -1).join("\n")}\n${
-        lang.singleLineComment
-      } ${input.injectDetails
-        .split("\n")
-        .join(`\n${lang.singleLineComment} `)}\n${lines[lines.length - 1]}`;
+      fullPrefix = `${lines.slice(0, -1).join("\n")}\n${lang.singleLineComment
+        } ${input.injectDetails
+          .split("\n")
+          .join(`\n${lang.singleLineComment} `)}\n${lines[lines.length - 1]}`;
     }
 
     const fullSuffix = getRangeInString(fileContents, {
@@ -519,17 +521,17 @@ export class CompletionProvider {
 
     let extrasSnippets = options.useOtherFiles
       ? ((await Promise.race([
-          this.getDefinitionsFromLsp(
-            filepath,
-            fullPrefix + fullSuffix,
-            fullPrefix.length,
-            this.ide,
-            lang,
-          ),
-          new Promise((resolve) => {
-            setTimeout(() => resolve([]), 100);
-          }),
-        ])) as AutocompleteSnippet[])
+        this.getDefinitionsFromLsp(
+          filepath,
+          fullPrefix + fullSuffix,
+          fullPrefix.length,
+          this.ide,
+          lang,
+        ),
+        new Promise((resolve) => {
+          setTimeout(() => resolve([]), 100);
+        }),
+      ])) as AutocompleteSnippet[])
       : [];
 
     const workspaceDirs = await this.ide.getWorkspaceDirs();
@@ -568,8 +570,8 @@ export class CompletionProvider {
       completionOptions,
       compilePrefixSuffix = undefined,
     } = options.template
-      ? { template: options.template, completionOptions: {} }
-      : getTemplateForModel(llm.model);
+        ? { template: options.template, completionOptions: {} }
+        : getTemplateForModel(llm.model);
 
     let prompt: string;
     const filename = getBasename(filepath);
@@ -624,6 +626,7 @@ export class CompletionProvider {
         snippets,
       );
     }
+    console.log(prompt);
 
     // Completion
     let completion = "";
@@ -638,15 +641,15 @@ export class CompletionProvider {
       cacheHit = true;
       completion = cachedCompletion;
     } else {
-      const stop = [
-        ...(completionOptions?.stop || []),
-        ...multilineStops,
-        ...commonStops,
-        ...(llm.model.toLowerCase().includes("starcoder2")
-          ? STARCODER2_T_ARTIFACTS
-          : []),
-        ...(lang.stopWords ?? []),
-        ...lang.topLevelKeywords.map((word) => `\n${word}`),
+      const stop = ["abc"
+        // ...(completionOptions?.stop || []),
+        // ...multilineStops,
+        // ...commonStops,
+        // ...(llm.model.toLowerCase().includes("starcoder2")
+        //   ? STARCODER2_T_ARTIFACTS
+        //   : []),
+        // ...(lang.stopWords ?? []),
+        // ...lang.topLevelKeywords.map((word) => `\n${word}`),
       ];
 
       let langMultilineDecision = lang.useMultiline?.({ prefix, suffix });
@@ -666,14 +669,14 @@ export class CompletionProvider {
         () =>
           llm.supportsFim()
             ? llm.streamFim(prefix, suffix, {
-                ...completionOptions,
-                stop,
-              })
+              ...completionOptions,
+              stop,
+            })
             : llm.streamComplete(prompt, {
-                ...completionOptions,
-                raw: true,
-                stop,
-              }),
+              ...completionOptions,
+              raw: true,
+              stop,
+            }),
         multiline,
       );
 
@@ -748,6 +751,8 @@ export class CompletionProvider {
       if (cancelled) {
         return undefined;
       }
+      console.log(completion);
+
 
       const processedCompletion = postprocessCompletion({
         completion,
@@ -763,6 +768,9 @@ export class CompletionProvider {
     }
 
     const time = Date.now() - startTime;
+    console.log(completion);
+    console.log(prompt);
+    completion = this.addCommentToLines(completion)
     return {
       time,
       completion,
@@ -779,5 +787,12 @@ export class CompletionProvider {
       uniqueId: await this.ide.getUniqueId(),
       ...options,
     };
+  }
+
+  private addCommentToLines(text: string): string {
+    return text
+      .split('\n')          // Split the string into lines
+      .map(line => `// ${line}`)  // Add "// " to the start of each line
+      .join('\n');           // Join the lines back into a single string
   }
 }
