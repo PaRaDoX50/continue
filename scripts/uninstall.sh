@@ -1,5 +1,5 @@
 #!/bin/bash
-
+# Script to delete all the installed modules
 # List of directories to delete
 directories=(
   "./gui/node_modules"
