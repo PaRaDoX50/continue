@@ -19,7 +19,7 @@ import { getConfigJsonPath } from "core/util/paths";
 import * as fs from "node:fs";
 import * as path from "node:path";
 import * as vscode from "vscode";
-import { VerticalDiffManager } from "../diff/vertical/manager";
+// import { VerticalDiffManager } from "../diff/vertical/manager";
 import {
   getControlPlaneSessionInfo,
   WorkOsAuthProvider,
@@ -75,7 +75,7 @@ export class VsCodeMessenger {
     >,
     private readonly webviewProtocol: VsCodeWebviewProtocol,
     private readonly ide: VsCodeIde,
-    private readonly verticalDiffManagerPromise: Promise<VerticalDiffManager>,
+    // private readonly verticalDiffManagerPromise: Promise<VerticalDiffManager>,
     private readonly configHandlerPromise: Promise<ConfigHandler>,
     private readonly workOsAuthProvider: WorkOsAuthProvider,
   ) {
@@ -133,13 +133,13 @@ export class VsCodeMessenger {
     this.onWebview("readFile", async (msg) => {
       return await ide.readFile(msg.data.filepath);
     });
-    this.onWebview("showDiff", async (msg) => {
-      return await ide.showDiff(
-        msg.data.filepath,
-        msg.data.newContents,
-        msg.data.stepIndex,
-      );
-    });
+    // this.onWebview("showDiff", async (msg) => {
+    //   return await ide.showDiff(
+    //     msg.data.filepath,
+    //     msg.data.newContents,
+    //     msg.data.stepIndex,
+    //   );
+    // });
 
     webviewProtocol.on("acceptDiff", async ({ data: { filepath } }) => {
       await vscode.commands.executeCommand("continue.acceptDiff", filepath);
@@ -149,74 +149,74 @@ export class VsCodeMessenger {
       await vscode.commands.executeCommand("continue.rejectDiff", filepath);
     });
 
-    this.onWebview("applyToCurrentFile", async (msg) => {
-      // Get active text editor
-      const editor = vscode.window.activeTextEditor;
-      if (!editor) {
-        vscode.window.showErrorMessage("No active editor to apply edits to");
-        return;
-      }
+    // this.onWebview("applyToCurrentFile", async (msg) => {
+    //   // Get active text editor
+    //   const editor = vscode.window.activeTextEditor;
+    //   if (!editor) {
+    //     vscode.window.showErrorMessage("No active editor to apply edits to");
+    //     return;
+    //   }
 
-      // Get LLM from config
-      const configHandler = await configHandlerPromise;
-      const config = await configHandler.loadConfig();
+    //   // Get LLM from config
+    //   const configHandler = await configHandlerPromise;
+    //   const config = await configHandler.loadConfig();
 
-      let llm = getModelByRole(config, "applyCodeBlock");
+    //   let llm = getModelByRole(config, "applyCodeBlock");
 
-      if (!llm) {
-        const defaultModelTitle = await this.webviewProtocol.request(
-          "getDefaultModelTitle",
-          undefined,
-        );
+    //   if (!llm) {
+    //     const defaultModelTitle = await this.webviewProtocol.request(
+    //       "getDefaultModelTitle",
+    //       undefined,
+    //     );
 
-        llm = config.models.find((model) => model.title === defaultModelTitle);
+    //     llm = config.models.find((model) => model.title === defaultModelTitle);
 
-        if (!llm) {
-          vscode.window.showErrorMessage(
-            `Model ${defaultModelTitle} not found in config.`,
-          );
-          return;
-        }
-      }
+    //     if (!llm) {
+    //       vscode.window.showErrorMessage(
+    //         `Model ${defaultModelTitle} not found in config.`,
+    //       );
+    //       return;
+    //     }
+    //   }
 
-      const fastLlm = getModelByRole(config, "repoMapFileSelection") ?? llm;
+    //   const fastLlm = getModelByRole(config, "repoMapFileSelection") ?? llm;
 
-      // Generate the diff and pass through diff manager
-      const [instant, diffLines] = await applyCodeBlock(
-        editor.document.getText(),
-        msg.data.text,
-        getBasename(editor.document.fileName),
-        llm,
-        fastLlm,
-      );
-      const verticalDiffManager = await this.verticalDiffManagerPromise;
-      if (instant) {
-        verticalDiffManager.streamDiffLines(
-          diffLines,
-          instant,
-          msg.data.streamId,
-        );
-      } else {
-        const prompt = `The following code was suggested as an edit:\n\`\`\`\n${msg.data.text}\n\`\`\`\nPlease apply it to the previous code.`;
-        const fullEditorRange = new vscode.Range(
-          0,
-          0,
-          editor.document.lineCount - 1,
-          editor.document.lineAt(editor.document.lineCount - 1).text.length,
-        );
-        const rangeToApplyTo = editor.selection.isEmpty
-          ? fullEditorRange
-          : editor.selection;
-        verticalDiffManager.streamEdit(
-          prompt,
-          llm.title,
-          msg.data.streamId,
-          undefined,
-          undefined,
-          rangeToApplyTo,
-        );
-      }
-    });
+    //   // Generate the diff and pass through diff manager
+    //   const [instant, diffLines] = await applyCodeBlock(
+    //     editor.document.getText(),
+    //     msg.data.text,
+    //     getBasename(editor.document.fileName),
+    //     llm,
+    //     fastLlm,
+    //   );
+    //   // const verticalDiffManager = await this.verticalDiffManagerPromise;
+    //   if (instant) {
+    //     verticalDiffManager.streamDiffLines(
+    //       diffLines,
+    //       instant,
+    //       msg.data.streamId,
+    //     );
+    //   } else {
+    //     const prompt = `The following code was suggested as an edit:\n\`\`\`\n${msg.data.text}\n\`\`\`\nPlease apply it to the previous code.`;
+    //     const fullEditorRange = new vscode.Range(
+    //       0,
+    //       0,
+    //       editor.document.lineCount - 1,
+    //       editor.document.lineAt(editor.document.lineCount - 1).text.length,
+    //     );
+    //     const rangeToApplyTo = editor.selection.isEmpty
+    //       ? fullEditorRange
+    //       : editor.selection;
+    //     verticalDiffManager.streamEdit(
+    //       prompt,
+    //       llm.title,
+    //       msg.data.streamId,
+    //       undefined,
+    //       undefined,
+    //       rangeToApplyTo,
+    //     );
+    //   }
+    // });
 
     this.onWebview("showTutorial", async (msg) => {
       const tutorialPath = path.join(

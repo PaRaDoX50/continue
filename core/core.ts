@@ -77,7 +77,7 @@ export class Core {
   constructor(
     private readonly messenger: IMessenger<ToCoreProtocol, FromCoreProtocol>,
     private readonly ide: IDE,
-    private readonly onWrite: (text: string) => Promise<void> = async () => {},
+    private readonly onWrite: (text: string) => Promise<void> = async () => { },
   ) {
     this.indexingState = { status: "loading", desc: "loading", progress: 0 };
 
@@ -165,7 +165,7 @@ export class Core {
       this.configHandler,
       ide,
       getLlm,
-      (e) => {},
+      (e) => { },
       (..._) => Promise.resolve([]),
     );
 
@@ -483,90 +483,90 @@ export class Core {
     on("tts/kill", async () => {
       void TTS.kill();
     });
-    
+
     on("chatDescriber/describe", async (msg) => {
       const currentModel = await this.getSelectedModel();
       return await ChatDescriber.describe(currentModel, {}, msg.data);
     });
 
-    async function* runNodeJsSlashCommand(
-      configHandler: ConfigHandler,
-      abortedMessageIds: Set<string>,
-      msg: Message<ToCoreProtocol["command/run"][0]>,
-      messenger: IMessenger<ToCoreProtocol, FromCoreProtocol>,
-    ) {
-      const {
-        input,
-        history,
-        modelTitle,
-        slashCommandName,
-        contextItems,
-        params,
-        historyIndex,
-        selectedCode,
-      } = msg.data;
+    // async function* runNodeJsSlashCommand(
+    //   configHandler: ConfigHandler,
+    //   abortedMessageIds: Set<string>,
+    //   msg: Message<ToCoreProtocol["command/run"][0]>,
+    //   messenger: IMessenger<ToCoreProtocol, FromCoreProtocol>,
+    // ) {
+    //   const {
+    //     input,
+    //     history,
+    //     modelTitle,
+    //     slashCommandName,
+    //     contextItems,
+    //     params,
+    //     historyIndex,
+    //     selectedCode,
+    //   } = msg.data;
 
-      const config = await configHandler.loadConfig();
-      const llm = await configHandler.llmFromTitle(modelTitle);
-      const slashCommand = config.slashCommands?.find(
-        (sc) => sc.name === slashCommandName,
-      );
-      if (!slashCommand) {
-        throw new Error(`Unknown slash command ${slashCommandName}`);
-      }
+    //   const config = await configHandler.loadConfig();
+    //   const llm = await configHandler.llmFromTitle(modelTitle);
+    //   const slashCommand = config.slashCommands?.find(
+    //     (sc) => sc.name === slashCommandName,
+    //   );
+    //   if (!slashCommand) {
+    //     throw new Error(`Unknown slash command ${slashCommandName}`);
+    //   }
 
-      void Telemetry.capture(
-        "useSlashCommand",
-        {
-          name: slashCommandName,
-        },
-        true,
-      );
+    //   void Telemetry.capture(
+    //     "useSlashCommand",
+    //     {
+    //       name: slashCommandName,
+    //     },
+    //     true,
+    //   );
 
-      const checkActiveInterval = setInterval(() => {
-        if (abortedMessageIds.has(msg.messageId)) {
-          abortedMessageIds.delete(msg.messageId);
-          clearInterval(checkActiveInterval);
-        }
-      }, 100);
+    //   const checkActiveInterval = setInterval(() => {
+    //     if (abortedMessageIds.has(msg.messageId)) {
+    //       abortedMessageIds.delete(msg.messageId);
+    //       clearInterval(checkActiveInterval);
+    //     }
+    //   }, 100);
 
-      for await (const content of slashCommand.run({
-        input,
-        history,
-        llm,
-        contextItems,
-        params,
-        ide,
-        addContextItem: (item) => {
-          void messenger.request("addContextItem", {
-            item,
-            historyIndex,
-          });
-        },
-        selectedCode,
-        config,
-        fetch: (url, init) =>
-          fetchwithRequestOptions(url, init, config.requestOptions),
-      })) {
-        if (abortedMessageIds.has(msg.messageId)) {
-          abortedMessageIds.delete(msg.messageId);
-          break;
-        }
-        if (content) {
-          yield { content };
-        }
-      }
-      clearInterval(checkActiveInterval);
-      yield { done: true, content: "" };
-    }
-    on("command/run", (msg) =>
-      runNodeJsSlashCommand(
-        this.configHandler,
-        this.abortedMessageIds,
-        msg,
-        this.messenger,
-      ),
-    );
+    //   for await (const content of slashCommand.run({
+    //     input,
+    //     history,
+    //     llm,
+    //     contextItems,
+    //     params,
+    //     ide,
+    //     addContextItem: (item) => {
+    //       void messenger.request("addContextItem", {
+    //         item,
+    //         historyIndex,
+    //       });
+    //     },
+    //     selectedCode,
+    //     config,
+    //     fetch: (url, init) =>
+    //       fetchwithRequestOptions(url, init, config.requestOptions),
+    //   })) {
+    //     if (abortedMessageIds.has(msg.messageId)) {
+    //       abortedMessageIds.delete(msg.messageId);
+    //       break;
+    //     }
+    //     if (content) {
+    //       yield { content };
+    //     }
+    //   }
+    //   clearInterval(checkActiveInterval);
+    //   yield { done: true, content: "" };
+    // }
+    // on("command/run", (msg) =>
+    //   runNodeJsSlashCommand(
+    //     this.configHandler,
+    //     this.abortedMessageIds,
+    //     msg,
+    //     this.messenger,
+    //   ),
+    // );
 
     // Autocomplete
     on("autocomplete/complete", async (msg) => {

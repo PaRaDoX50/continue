@@ -157,9 +157,9 @@ export class ReverseMessageIde {
       return this.ide.readFile(data.filepath);
     });
 
-    this.on("showDiff", (data) => {
-      return this.ide.showDiff(data.filepath, data.newContents, data.stepIndex);
-    });
+    // this.on("showDiff", (data) => {
+    //   return this.ide.showDiff(data.filepath, data.newContents, data.stepIndex);
+    // });
 
     this.on("getOpenFiles", () => {
       return this.ide.getOpenFiles();

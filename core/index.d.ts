@@ -491,11 +491,11 @@ export interface IDE {
     startLine: number,
     endLine: number,
   ): Promise<void>;
-  showDiff(
-    filepath: string,
-    newContents: string,
-    stepIndex: number,
-  ): Promise<void>;
+  // showDiff(
+  //   filepath: string,
+  //   newContents: string,
+  //   stepIndex: number,
+  // ): Promise<void>;
   getOpenFiles(): Promise<string[]>;
   getCurrentFile(): Promise<string | undefined>;
   getPinnedFiles(): Promise<string[]>;
@@ -1030,7 +1030,7 @@ export interface Config {
   /** Request options that will be applied to all models and context providers */
   requestOptions?: RequestOptions;
   /** The list of slash commands that will be available in the sidebar */
-  slashCommands?: SlashCommand[];
+  // slashCommands?: SlashCommand[];
   /** Each entry in this array will originally be a ContextProviderWithParams, the same object from your config.json, but you may add CustomContextProviders.
    * A CustomContextProvider requires you only to define a title and getContextItems function. When you type '@title <query>', Continue will call `getContextItems(query)`.
    */
@@ -1067,7 +1067,7 @@ export interface ContinueConfig {
   systemMessage?: string;
   completionOptions?: BaseCompletionOptions;
   requestOptions?: RequestOptions;
-  slashCommands?: SlashCommand[];
+  // slashCommands?: SlashCommand[];
   contextProviders?: IContextProvider[];
   disableSessionTitles?: boolean;
   disableIndexing?: boolean;
@@ -1088,7 +1088,7 @@ export interface BrowserSerializedContinueConfig {
   systemMessage?: string;
   completionOptions?: BaseCompletionOptions;
   requestOptions?: RequestOptions;
-  slashCommands?: SlashCommandDescription[];
+  // slashCommands?: SlashCommandDescription[];
   contextProviders?: ContextProviderDescription[];
   disableIndexing?: boolean;
   disableSessionTitles?: boolean;

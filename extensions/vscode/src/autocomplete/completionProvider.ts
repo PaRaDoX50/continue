@@ -26,8 +26,7 @@ interface VsCodeCompletionInput {
 }
 
 export class ContinueCompletionProvider
-  implements vscode.InlineCompletionItemProvider
-{
+  implements vscode.InlineCompletionItemProvider {
   private onError(e: any) {
     const options = ["Documentation"];
     if (e.message.includes("https://ollama.ai")) {
@@ -90,6 +89,9 @@ export class ContinueCompletionProvider
     token: vscode.CancellationToken,
     //@ts-ignore
   ): ProviderResult<InlineCompletionItem[] | InlineCompletionList> {
+    if (context.triggerKind == vscode.InlineCompletionTriggerKind.Automatic) {
+      return null;
+    }
     const enableTabAutocomplete =
       getStatusBarStatus() === StatusBarStatus.Enabled;
     if (token.isCancellationRequested || !enableTabAutocomplete) {

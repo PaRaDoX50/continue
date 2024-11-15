@@ -16,10 +16,7 @@ import {
 } from "../autocomplete/statusBar";
 import { registerAllCommands } from "../commands";
 import { ContinueGUIWebviewViewProvider } from "../ContinueGUIWebviewViewProvider";
-import { DiffManager } from "../diff/horizontal";
-import { VerticalDiffManager } from "../diff/vertical/manager";
 import { registerAllCodeLensProviders } from "../lang-server/codeLens";
-import { QuickEdit } from "../quickEdit/QuickEditQuickPick";
 import { setupRemoteConfigSync } from "../stubs/activation";
 import {
   getControlPlaneSessionInfo,
@@ -41,8 +38,6 @@ export class VsCodeExtension {
   private tabAutocompleteModel: TabAutocompleteModel;
   private sidebar: ContinueGUIWebviewViewProvider;
   private windowId: string;
-  private diffManager: DiffManager;
-  private verticalDiffManager: VerticalDiffManager;
   webviewProtocolPromise: Promise<VsCodeWebviewProtocol>;
   private core: Core;
   private battery: Battery;
@@ -60,18 +55,17 @@ export class VsCodeExtension {
         resolveWebviewProtocol = resolve;
       },
     );
-    this.diffManager = new DiffManager(context);
-    this.ide = new VsCodeIde(this.diffManager, this.webviewProtocolPromise);
+    this.ide = new VsCodeIde();
     this.extensionContext = context;
     this.windowId = uuidv4();
 
     // Dependencies of core
     let resolveVerticalDiffManager: any = undefined;
-    const verticalDiffManagerPromise = new Promise<VerticalDiffManager>(
-      (resolve) => {
-        resolveVerticalDiffManager = resolve;
-      },
-    );
+    // const verticalDiffManagerPromise = new Promise<VerticalDiffManager>(
+    //   (resolve) => {
+    //     resolveVerticalDiffManager = resolve;
+    //   },
+    // );
     let resolveConfigHandler: any = undefined;
     const configHandlerPromise = new Promise<ConfigHandler>((resolve) => {
       resolveConfigHandler = resolve;
@@ -107,7 +101,7 @@ export class VsCodeExtension {
       inProcessMessenger,
       this.sidebar.webviewProtocol,
       this.ide,
-      verticalDiffManagerPromise,
+      // verticalDiffManagerPromise,
       configHandlerPromise,
       this.workOsAuthProvider,
     );
@@ -125,11 +119,11 @@ export class VsCodeExtension {
     resolveConfigHandler?.(this.configHandler);
 
     this.configHandler.reloadConfig();
-    this.verticalDiffManager = new VerticalDiffManager(
-      this.configHandler,
-      this.sidebar.webviewProtocol,
-    );
-    resolveVerticalDiffManager?.(this.verticalDiffManager);
+    // this.verticalDiffManager = new VerticalDiffManager(
+    //   this.configHandler,
+    //   this.sidebar.webviewProtocol,
+    // );
+    // resolveVerticalDiffManager?.(this.verticalDiffManager);
     this.tabAutocompleteModel = new TabAutocompleteModel(this.configHandler);
 
     setupRemoteConfigSync(
@@ -137,19 +131,19 @@ export class VsCodeExtension {
     );
 
     // Indexing + pause token
-    this.diffManager.webviewProtocol = this.sidebar.webviewProtocol;
+    // this.diffManager.webviewProtocol = this.sidebar.webviewProtocol;
 
-    this.configHandler.loadConfig().then((config) => {
-      const { verticalDiffCodeLens } = registerAllCodeLensProviders(
-        context,
-        this.diffManager,
-        this.verticalDiffManager.filepathToCodeLens,
-        config,
-      );
+    // this.configHandler.loadConfig().then((config) => {
+    //   const { verticalDiffCodeLens } = registerAllCodeLensProviders(
+    //     context,
+    //     this.diffManager,
+    //     this.verticalDiffManager.filepathToCodeLens,
+    //     config,
+    //   );
 
-      this.verticalDiffManager.refreshCodeLens =
-        verticalDiffCodeLens.refresh.bind(verticalDiffCodeLens);
-    });
+    //   this.verticalDiffManager.refreshCodeLens =
+    //     verticalDiffCodeLens.refresh.bind(verticalDiffCodeLens);
+    // });
 
     this.configHandler.onConfigUpdate(
       ({ config: newConfig, errors, configLoadInterrupted }) => {
@@ -165,8 +159,8 @@ export class VsCodeExtension {
 
           registerAllCodeLensProviders(
             context,
-            this.diffManager,
-            this.verticalDiffManager.filepathToCodeLens,
+            // this.diffManager,
+            // this.verticalDiffManager.filepathToCodeLens,
             newConfig,
           );
         }
@@ -200,13 +194,13 @@ export class VsCodeExtension {
     context.subscriptions.push(this.battery);
     context.subscriptions.push(monitorBatteryChanges(this.battery));
 
-    const quickEdit = new QuickEdit(
-      this.verticalDiffManager,
-      this.configHandler,
-      this.sidebar.webviewProtocol,
-      this.ide,
-      context,
-    );
+    // const quickEdit = new QuickEdit(
+    //   this.verticalDiffManager,
+    //   this.configHandler,
+    //   this.sidebar.webviewProtocol,
+    //   this.ide,
+    //   context,
+    // );
 
     // Commands
     registerAllCommands(
@@ -215,11 +209,8 @@ export class VsCodeExtension {
       context,
       this.sidebar,
       this.configHandler,
-      this.diffManager,
-      this.verticalDiffManager,
       this.core.continueServerClientPromise,
       this.battery,
-      quickEdit,
       this.core,
     );
 
@@ -322,8 +313,7 @@ export class VsCodeExtension {
 
     // Register a content provider for the readonly virtual documents
     const documentContentProvider = new (class
-      implements vscode.TextDocumentContentProvider
-    {
+      implements vscode.TextDocumentContentProvider {
       // emitter and its event
       onDidChangeEmitter = new vscode.EventEmitter<vscode.Uri>();
       onDidChange = this.onDidChangeEmitter.event;

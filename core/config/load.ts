@@ -2,10 +2,6 @@ import * as JSONC from "comment-json";
 import * as fs from "fs";
 import path from "path";
 import * as tar from "tar";
-import {
-  slashCommandFromDescription,
-  slashFromCustomCommand,
-} from "../commands/index.js";
 import CustomContextProviderClass from "../context/providers/CustomContextProvider";
 import FileContextProvider from "../context/providers/FileContextProvider";
 import { contextProviderClassFromName } from "../context/providers/index";
@@ -172,16 +168,16 @@ async function serializedToIntermediateConfig(
   ide: IDE,
   loadPromptFiles: boolean = true,
 ): Promise<Config> {
-  const slashCommands: SlashCommand[] = [];
-  for (const command of initial.slashCommands || []) {
-    const newCommand = slashCommandFromDescription(command);
-    if (newCommand) {
-      slashCommands.push(newCommand);
-    }
-  }
-  for (const command of initial.customCommands || []) {
-    slashCommands.push(slashFromCustomCommand(command));
-  }
+  // const slashCommands: SlashCommand[] = [];
+  // for (const command of initial.slashCommands || []) {
+  //   const newCommand = slashCommandFromDescription(command);
+  //   if (newCommand) {
+  //     slashCommands.push(newCommand);
+  //   }
+  // }
+  // for (const command of initial.customCommands || []) {
+  //   slashCommands.push(slashFromCustomCommand(command));
+  // }
 
   const workspaceDirs = await ide.getWorkspaceDirs();
   const promptFolder = initial.experimental?.promptPath;
@@ -204,14 +200,14 @@ async function serializedToIntermediateConfig(
     // Also read from ~/.continue/.prompts
     promptFiles.push(...readAllGlobalPromptFiles());
 
-    for (const file of promptFiles) {
-      slashCommands.push(slashCommandFromPromptFile(file.path, file.content));
-    }
+    // for (const file of promptFiles) {
+    //   slashCommands.push(slashCommandFromPromptFile(file.path, file.content));
+    // }
   }
 
   const config: Config = {
     ...initial,
-    slashCommands,
+    // slashCommands,
     contextProviders: initial.contextProviders || [],
   };
 
@@ -383,8 +379,8 @@ async function intermediateToFinalConfig(
       (config.contextProviders || [])
         .filter(isContextProviderWithParams)
         .find((cp) => cp.name === "codebase") as
-        | ContextProviderWithParams
-        | undefined
+      | ContextProviderWithParams
+      | undefined
     )?.params || {};
   const DEFAULT_CONTEXT_PROVIDERS = [
     new FileContextProvider({}),
@@ -499,11 +495,11 @@ function finalToBrowserConfig(
     })),
     systemMessage: final.systemMessage,
     completionOptions: final.completionOptions,
-    slashCommands: final.slashCommands?.map((s) => ({
-      name: s.name,
-      description: s.description,
-      params: s.params, //PZTODO: is this why params aren't referenced properly by slash commands?
-    })),
+    // slashCommands: final.slashCommands?.map((s) => ({
+    //   name: s.name,
+    //   description: s.description,
+    //   params: s.params, //PZTODO: is this why params aren't referenced properly by slash commands?
+    // })),
     contextProviders: final.contextProviders?.map((c) => c.description),
     disableIndexing: final.disableIndexing,
     disableSessionTitles: final.disableSessionTitles,

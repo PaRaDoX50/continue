@@ -25,7 +25,6 @@ import {
 } from "core/util/paths";
 import * as vscode from "vscode";
 import { executeGotoProvider } from "./autocomplete/lsp";
-import { DiffManager } from "./diff/horizontal";
 import { Repository } from "./otherExtensions/git";
 import { VsCodeIdeUtils } from "./util/ideUtils";
 import {
@@ -39,8 +38,6 @@ class VsCodeIde implements IDE {
   ideUtils: VsCodeIdeUtils;
 
   constructor(
-    private readonly diffManager: DiffManager,
-    private readonly vscodeWebviewProtocolPromise: Promise<VsCodeWebviewProtocol>,
   ) {
     this.ideUtils = new VsCodeIdeUtils();
   }
@@ -118,10 +115,10 @@ class VsCodeIde implements IDE {
               await vscode.commands.executeCommand(
                 "continue.continueGUIView.focus",
               );
-              (await this.vscodeWebviewProtocolPromise).request(
-                "openOnboardingCard",
-                undefined,
-              );
+              // (await this.vscodeWebviewProtocolPromise).request(
+              //   "openOnboardingCard",
+              //   undefined,
+              // );
 
               // Remove free trial models
               editConfigJson((config) => {
@@ -424,13 +421,13 @@ class VsCodeIde implements IDE {
   async readFile(filepath: string): Promise<string> {
     return await this.ideUtils.readFile(filepath);
   }
-  async showDiff(
-    filepath: string,
-    newContents: string,
-    stepIndex: number,
-  ): Promise<void> {
-    await this.diffManager.writeDiff(filepath, newContents, stepIndex);
-  }
+  // async showDiff(
+  //   filepath: string,
+  //   newContents: string,
+  //   stepIndex: number,
+  // ): Promise<void> {
+  //   await this.diffManager.writeDiff(filepath, newContents, stepIndex);
+  // }
 
   async getOpenFiles(): Promise<string[]> {
     return await this.ideUtils.getOpenFiles();
