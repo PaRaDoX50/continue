@@ -1,5 +1,5 @@
 import { ConfigHandler } from "core/config/ConfigHandler";
-import { getModelByRole } from "core/config/util";
+// import { getModelByRole } from "core/config/util";
 import { applyCodeBlock } from "core/edit/lazy/applyCodeBlock";
 import {
   FromCoreProtocol,
@@ -350,9 +350,9 @@ export class VsCodeMessenger {
     this.onWebviewOrCore("showToast", (msg) => {
       this.ide.showToast(...msg.data);
     });
-    this.onWebviewOrCore("getGitHubAuthToken", (msg) =>
-      ide.getGitHubAuthToken(msg.data),
-    );
+    // this.onWebviewOrCore("getGitHubAuthToken", (msg) =>
+    //   ide.getGitHubAuthToken(msg.data),
+    // );
     this.onWebviewOrCore("getControlPlaneSessionInfo", async (msg) => {
       return getControlPlaneSessionInfo(msg.data.silent);
     });

@@ -15,7 +15,7 @@ export const WEBVIEW_TO_CORE_PASS_THROUGH: (keyof ToCoreFromWebviewProtocol)[] =
     "history/save",
     "devdata/log",
     "config/addOpenAiKey",
-    "config/addModel",
+    // "config/addModel",
     "config/newPromptFile",
     "config/ideSettingsUpdate",
     "config/getSerializedProfileInfo",

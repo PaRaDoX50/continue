@@ -33,9 +33,9 @@ export class ReverseMessageIde {
   }
 
   private initializeListeners() {
-    this.on("getGitHubAuthToken", (data) => {
-      return this.ide.getGitHubAuthToken(data);
-    });
+    // this.on("getGitHubAuthToken", (data) => {
+    //   return this.ide.getGitHubAuthToken(data);
+    // });
 
     this.on("getLastModified", (data) => {
       return this.ide.getLastModified(data.files);

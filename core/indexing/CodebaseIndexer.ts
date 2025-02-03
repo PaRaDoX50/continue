@@ -17,7 +17,7 @@ import {
 import { walkDirAsync } from "./walkDir.js";
 
 export class PauseToken {
-  constructor(private _paused: boolean) {}
+  constructor(private _paused: boolean) { }
 
   set paused(value: boolean) {
     this._paused = value;
@@ -52,7 +52,7 @@ export class CodebaseIndexer {
     protected readonly ide: IDE,
     private readonly pauseToken: PauseToken,
     private readonly continueServerClient: IContinueServerClient,
-  ) {}
+  ) { }
 
   async clearIndexes() {
     const sqliteFilepath = getIndexSqlitePath();
@@ -76,18 +76,18 @@ export class CodebaseIndexer {
     const pathSep = await this.ide.pathSep();
 
     const indexes = [
-      new ChunkCodebaseIndex(
-        this.ide.readFile.bind(this.ide),
-        pathSep,
-        this.continueServerClient,
-        config.embeddingsProvider.maxChunkSize,
-      ), // Chunking must come first
-      new LanceDbIndex(
-        config.embeddingsProvider,
-        this.ide.readFile.bind(this.ide),
-        pathSep,
-        this.continueServerClient,
-      ),
+      // new ChunkCodebaseIndex(
+      //   this.ide.readFile.bind(this.ide),
+      //   pathSep,
+      //   this.continueServerClient,
+      //   config.embeddingsProvider.maxChunkSize,
+      // ), // Chunking must come first
+      // new LanceDbIndex(
+      //   config.embeddingsProvider,
+      //   this.ide.readFile.bind(this.ide),
+      //   pathSep,
+      //   this.continueServerClient,
+      // ),
       new FullTextSearchCodebaseIndex(),
       new CodeSnippetsCodebaseIndex(this.ide),
     ];

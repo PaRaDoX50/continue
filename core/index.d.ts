@@ -513,7 +513,7 @@ export interface IDE {
   getGitRootPath(dir: string): Promise<string | undefined>;
   listDir(dir: string): Promise<[string, FileType][]>;
   getLastModified(files: string[]): Promise<{ [path: string]: number }>;
-  getGitHubAuthToken(args: GetGhTokenArgs): Promise<string | undefined>;
+  // getGitHubAuthToken(args: GetGhTokenArgs): Promise<string | undefined>;
 
   // LSP
   gotoDefinition(location: Location): Promise<RangeInFile[]>;
@@ -986,26 +986,26 @@ interface AnalyticsConfig {
 
 // config.json
 export interface SerializedContinueConfig {
-  env?: string[];
-  allowAnonymousTelemetry?: boolean;
-  models: ModelDescription[];
-  systemMessage?: string;
-  completionOptions?: BaseCompletionOptions;
-  requestOptions?: RequestOptions;
-  slashCommands?: SlashCommandDescription[];
-  customCommands?: CustomCommand[];
-  contextProviders?: ContextProviderWithParams[];
-  disableIndexing?: boolean;
-  disableSessionTitles?: boolean;
-  userToken?: string;
-  embeddingsProvider?: EmbeddingsProviderDescription;
+  // env?: string[];
+  // allowAnonymousTelemetry?: boolean;
+  // models: ModelDescription[];
+  // systemMessage?: string;
+  // completionOptions?: BaseCompletionOptions;
+  // requestOptions?: RequestOptions;
+  // slashCommands?: SlashCommandDescription[];
+  // customCommands?: CustomCommand[];
+  // contextProviders?: ContextProviderWithParams[];
+  // disableIndexing?: boolean;
+  // disableSessionTitles?: boolean;
+  // userToken?: string;
+  // embeddingsProvider?: EmbeddingsProviderDescription;
   tabAutocompleteModel?: ModelDescription | ModelDescription[];
-  tabAutocompleteOptions?: Partial<TabAutocompleteOptions>;
-  ui?: ContinueUIConfig;
-  reranker?: RerankerDescription;
-  experimental?: ExperimentalConfig;
-  analytics?: AnalyticsConfig;
-  docs?: SiteIndexingConfig[];
+  // tabAutocompleteOptions?: Partial<TabAutocompleteOptions>;
+  // ui?: ContinueUIConfig;
+  // reranker?: RerankerDescription;
+  // experimental?: ExperimentalConfig;
+  // analytics?: AnalyticsConfig;
+  // docs?: SiteIndexingConfig[];
 }
 
 export type ConfigMergeType = "merge" | "overwrite";
@@ -1017,14 +1017,14 @@ export type ContinueRcJson = Partial<SerializedContinueConfig> & {
 // config.ts - give users simplified interfaces
 export interface Config {
   /** If set to true, Continue will collect anonymous usage data to improve the product. If set to false, we will collect nothing. Read here to learn more: https://docs.continue.dev/telemetry */
-  allowAnonymousTelemetry?: boolean;
+  // allowAnonymousTelemetry?: boolean;
   /** Each entry in this array will originally be a ModelDescription, the same object from your config.json, but you may add CustomLLMs.
    * A CustomLLM requires you only to define an AsyncGenerator that calls the LLM and yields string updates. You can choose to define either `streamCompletion` or `streamChat` (or both).
    * Continue will do the rest of the work to construct prompt templates, handle context items, prune context, etc.
    */
-  models: (CustomLLM | ModelDescription)[];
+  // models: (CustomLLM | ModelDescription)[];
   /** A system message to be followed by all of your models */
-  systemMessage?: string;
+  // systemMessage?: string;
   /** The default completion options for all models */
   completionOptions?: BaseCompletionOptions;
   /** Request options that will be applied to all models and context providers */
@@ -1034,15 +1034,15 @@ export interface Config {
   /** Each entry in this array will originally be a ContextProviderWithParams, the same object from your config.json, but you may add CustomContextProviders.
    * A CustomContextProvider requires you only to define a title and getContextItems function. When you type '@title <query>', Continue will call `getContextItems(query)`.
    */
-  contextProviders?: (CustomContextProvider | ContextProviderWithParams)[];
+  // contextProviders?: (CustomContextProvider | ContextProviderWithParams)[];
   /** If set to true, Continue will not index your codebase for retrieval */
-  disableIndexing?: boolean;
+  // disableIndexing?: boolean;
   /** If set to true, Continue will not make extra requests to the LLM to generate a summary title of each session. */
-  disableSessionTitles?: boolean;
+  // disableSessionTitles?: boolean;
   /** An optional token to identify a user. Not used by Continue unless you write custom coniguration that requires such a token */
-  userToken?: string;
+  // userToken?: string;
   /** The provider used to calculate embeddings. If left empty, Continue will use transformers.js to calculate the embeddings with all-MiniLM-L6-v2 */
-  embeddingsProvider?: EmbeddingsProviderDescription | EmbeddingsProvider;
+  // embeddingsProvider?: EmbeddingsProviderDescription | EmbeddingsProvider;
   /** The model that Continue will use for tab autocompletions. */
   tabAutocompleteModel?:
   | CustomLLM
@@ -1051,19 +1051,19 @@ export interface Config {
   /** Options for tab autocomplete */
   tabAutocompleteOptions?: Partial<TabAutocompleteOptions>;
   /** UI styles customization */
-  ui?: ContinueUIConfig;
+  // ui?: ContinueUIConfig;
   /** Options for the reranker */
-  reranker?: RerankerDescription | Reranker;
+  // reranker?: RerankerDescription | Reranker;
   /** Experimental configuration */
-  experimental?: ExperimentalConfig;
+  // experimental?: ExperimentalConfig;
   /** Analytics configuration */
-  analytics?: AnalyticsConfig;
+  // analytics?: AnalyticsConfig;
 }
 
 // in the actual Continue source code
 export interface ContinueConfig {
   allowAnonymousTelemetry?: boolean;
-  models: ILLM[];
+  // models: ILLM[];
   systemMessage?: string;
   completionOptions?: BaseCompletionOptions;
   requestOptions?: RequestOptions;
@@ -1072,11 +1072,11 @@ export interface ContinueConfig {
   disableSessionTitles?: boolean;
   disableIndexing?: boolean;
   userToken?: string;
-  embeddingsProvider: EmbeddingsProvider;
+  // embeddingsProvider: EmbeddingsProvider;
   tabAutocompleteModels?: ILLM[];
   tabAutocompleteOptions?: Partial<TabAutocompleteOptions>;
   ui?: ContinueUIConfig;
-  reranker?: Reranker;
+  // reranker?: Reranker;
   experimental?: ExperimentalConfig;
   analytics?: AnalyticsConfig;
   docs?: SiteIndexingConfig[];
@@ -1084,7 +1084,7 @@ export interface ContinueConfig {
 
 export interface BrowserSerializedContinueConfig {
   allowAnonymousTelemetry?: boolean;
-  models: ModelDescription[];
+  // models: ModelDescription[];
   systemMessage?: string;
   completionOptions?: BaseCompletionOptions;
   requestOptions?: RequestOptions;

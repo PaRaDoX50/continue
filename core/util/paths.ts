@@ -70,7 +70,7 @@ export function getSessionsListPath(): string {
 }
 
 export function getConfigJsonPath(ideType: IdeType = "vscode"): string {
-  const p = path.join(getContinueGlobalPath(), "config.json");
+  const p = path.join(getContinueGlobalPath(), "cocoach-config.json");
   if (!fs.existsSync(p)) {
     if (ideType === "jetbrains") {
       fs.writeFileSync(p, JSON.stringify(defaultConfigJetBrains, null, 2));
@@ -264,7 +264,7 @@ export function getPathToRemoteConfig(remoteConfigServerUrl: string): string {
       typeof remoteConfigServerUrl !== "string" || remoteConfigServerUrl === ""
         ? undefined
         : new URL(remoteConfigServerUrl);
-  } catch (e) {}
+  } catch (e) { }
   const dir = path.join(getRemoteConfigsFolderPath(), url?.hostname ?? "None");
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir);

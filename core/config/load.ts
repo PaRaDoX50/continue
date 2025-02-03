@@ -2,11 +2,11 @@ import * as JSONC from "comment-json";
 import * as fs from "fs";
 import path from "path";
 import * as tar from "tar";
-import CustomContextProviderClass from "../context/providers/CustomContextProvider";
-import FileContextProvider from "../context/providers/FileContextProvider";
-import { contextProviderClassFromName } from "../context/providers/index";
-import { AllRerankers } from "../context/rerankers/index";
-import { LLMReranker } from "../context/rerankers/llm";
+// import CustomContextProviderClass from "../context/providers/CustomContextProvider";
+// import FileContextProvider from "../context/providers/FileContextProvider";
+// import { contextProviderClassFromName } from "../context/providers/index";
+// import { AllRerankers } from "../context/rerankers/index";
+// import { LLMReranker } from "../context/rerankers/llm";
 import {
   BrowserSerializedContinueConfig,
   Config,
@@ -34,8 +34,8 @@ import FreeTrial from "../llm/llms/FreeTrial";
 import { llmFromDescription } from "../llm/llms";
 import os from "os";
 import { execSync } from "child_process";
-import CodebaseContextProvider from "../context/providers/CodebaseContextProvider";
-import ContinueProxyContextProvider from "../context/providers/ContinueProxyContextProvider";
+// import CodebaseContextProvider from "../context/providers/CodebaseContextProvider";
+// import ContinueProxyContextProvider from "../context/providers/ContinueProxyContextProvider";
 import { fetchwithRequestOptions } from "../util/fetchWithOptions";
 import { copyOf } from "../util";
 import mergeJson from "../util/merge";
@@ -74,21 +74,21 @@ export interface ConfigResult<T> {
 function resolveSerializedConfig(filepath: string): SerializedContinueConfig {
   let content = fs.readFileSync(filepath, "utf8");
   const config = JSONC.parse(content) as unknown as SerializedContinueConfig;
-  if (config.env && Array.isArray(config.env)) {
-    const env = {
-      ...process.env,
-      ...getContinueDotEnv(),
-    };
+  // if (config.env && Array.isArray(config.env)) {
+  //   const env = {
+  //     ...process.env,
+  //     ...getContinueDotEnv(),
+  //   };
 
-    config.env.forEach((envVar) => {
-      if (envVar in env) {
-        content = (content as any).replaceAll(
-          new RegExp(`"${envVar}"`, "g"),
-          `"${env[envVar]}"`,
-        );
-      }
-    });
-  }
+  //   config.env.forEach((envVar) => {
+  //     if (envVar in env) {
+  //       content = (content as any).replaceAll(
+  //         new RegExp(`"${envVar}"`, "g"),
+  //         `"${env[envVar]}"`,
+  //       );
+  //     }
+  //   });
+  // }
 
   return JSONC.parse(content) as unknown as SerializedContinueConfig;
 }
@@ -126,9 +126,9 @@ function loadSerializedConfig(
     };
   }
 
-  if (config.allowAnonymousTelemetry === undefined) {
-    config.allowAnonymousTelemetry = true;
-  }
+  // if (config.allowAnonymousTelemetry === undefined) {
+  //   config.allowAnonymousTelemetry = true;
+  // }
 
   if (ideSettings.remoteConfigServerUrl) {
     try {
@@ -151,14 +151,14 @@ function loadSerializedConfig(
   }
 
   // Set defaults if undefined (this lets us keep config.json uncluttered for new users)
-  config.contextProviders ??=
-    ideType === "vscode"
-      ? [...defaultContextProvidersVsCode]
-      : [...defaultContextProvidersJetBrains];
-  config.slashCommands ??=
-    ideType === "vscode"
-      ? [...defaultSlashCommandsVscode]
-      : [...defaultSlashCommandsJetBrains];
+  // config.contextProviders ??=
+  ideType === "vscode"
+    ? [...defaultContextProvidersVsCode]
+    : [...defaultContextProvidersJetBrains];
+  // config.slashCommands ??=
+  ideType === "vscode"
+    ? [...defaultSlashCommandsVscode]
+    : [...defaultSlashCommandsJetBrains];
 
   return { config, errors, configLoadInterrupted: false };
 }
@@ -180,35 +180,35 @@ async function serializedToIntermediateConfig(
   // }
 
   const workspaceDirs = await ide.getWorkspaceDirs();
-  const promptFolder = initial.experimental?.promptPath;
+  // const promptFolder = initial.experimental?.promptPath;
 
-  if (loadPromptFiles) {
-    let promptFiles: { path: string; content: string }[] = [];
-    promptFiles = (
-      await Promise.all(
-        workspaceDirs.map((dir) =>
-          getPromptFiles(
-            ide,
-            path.join(dir, promptFolder ?? DEFAULT_PROMPTS_FOLDER),
-          ),
-        ),
-      )
-    )
-      .flat()
-      .filter(({ path }) => path.endsWith(".prompt"));
+  // if (loadPromptFiles) {
+  //   let promptFiles: { path: string; content: string }[] = [];
+  //   promptFiles = (
+  //     await Promise.all(
+  //       workspaceDirs.map((dir) =>
+  //         getPromptFiles(
+  //           ide,
+  //           path.join(dir, promptFolder ?? DEFAULT_PROMPTS_FOLDER),
+  //         ),
+  //       ),
+  //     )
+  //   )
+  //     .flat()
+  //     .filter(({ path }) => path.endsWith(".prompt"));
 
-    // Also read from ~/.continue/.prompts
-    promptFiles.push(...readAllGlobalPromptFiles());
+  //   // Also read from ~/.continue/.prompts
+  //   promptFiles.push(...readAllGlobalPromptFiles());
 
-    // for (const file of promptFiles) {
-    //   slashCommands.push(slashCommandFromPromptFile(file.path, file.content));
-    // }
-  }
+  //   // for (const file of promptFiles) {
+  //   //   slashCommands.push(slashCommandFromPromptFile(file.path, file.content));
+  //   // }
+  // }
 
   const config: Config = {
     ...initial,
     // slashCommands,
-    contextProviders: initial.contextProviders || [],
+    // contextProviders: initial.contextProviders || [],
   };
 
   return config;
@@ -237,102 +237,102 @@ async function intermediateToFinalConfig(
   allowFreeTrial: boolean = true,
 ): Promise<ContinueConfig> {
   // Auto-detect models
-  let models: BaseLLM[] = [];
-  for (const desc of config.models) {
-    if (isModelDescription(desc)) {
-      const llm = await llmFromDescription(
-        desc,
-        ide.readFile.bind(ide),
-        uniqueId,
-        ideSettings,
-        writeLog,
-        config.completionOptions,
-        config.systemMessage,
-      );
-      if (!llm) {
-        continue;
-      }
+  // let models: BaseLLM[] = [];
+  // for (const desc of config.models) {
+  //   if (isModelDescription(desc)) {
+  //     const llm = await llmFromDescription(
+  //       desc,
+  //       ide.readFile.bind(ide),
+  //       uniqueId,
+  //       ideSettings,
+  //       writeLog,
+  //       config.completionOptions,
+  //       config.systemMessage,
+  //     );
+  //     if (!llm) {
+  //       continue;
+  //     }
 
-      if (llm.model === "AUTODETECT") {
-        try {
-          const modelNames = await llm.listModels();
-          const detectedModels = await Promise.all(
-            modelNames.map(async (modelName) => {
-              return await llmFromDescription(
-                {
-                  ...desc,
-                  model: modelName,
-                  title: `${llm.title} - ${modelName}`,
-                },
-                ide.readFile.bind(ide),
-                uniqueId,
-                ideSettings,
-                writeLog,
-                copyOf(config.completionOptions),
-                config.systemMessage,
-              );
-            }),
-          );
-          models.push(
-            ...(detectedModels.filter(
-              (x) => typeof x !== "undefined",
-            ) as BaseLLM[]),
-          );
-        } catch (e) {
-          console.warn("Error listing models: ", e);
-        }
-      } else {
-        models.push(llm);
-      }
-    } else {
-      const llm = new CustomLLMClass({
-        ...desc,
-        options: { ...desc.options, writeLog } as any,
-      });
-      if (llm.model === "AUTODETECT") {
-        try {
-          const modelNames = await llm.listModels();
-          const models = modelNames.map(
-            (modelName) =>
-              new CustomLLMClass({
-                ...desc,
-                options: { ...desc.options, model: modelName, writeLog },
-              }),
-          );
+  //     if (llm.model === "AUTODETECT") {
+  //       try {
+  //         const modelNames = await llm.listModels();
+  //         const detectedModels = await Promise.all(
+  //           modelNames.map(async (modelName) => {
+  //             return await llmFromDescription(
+  //               {
+  //                 ...desc,
+  //                 model: modelName,
+  //                 title: `${llm.title} - ${modelName}`,
+  //               },
+  //               ide.readFile.bind(ide),
+  //               uniqueId,
+  //               ideSettings,
+  //               writeLog,
+  //               copyOf(config.completionOptions),
+  //               config.systemMessage,
+  //             );
+  //           }),
+  //         );
+  //         models.push(
+  //           ...(detectedModels.filter(
+  //             (x) => typeof x !== "undefined",
+  //           ) as BaseLLM[]),
+  //         );
+  //       } catch (e) {
+  //         console.warn("Error listing models: ", e);
+  //       }
+  //     } else {
+  //       models.push(llm);
+  //     }
+  //   } else {
+  //     const llm = new CustomLLMClass({
+  //       ...desc,
+  //       options: { ...desc.options, writeLog } as any,
+  //     });
+  //     if (llm.model === "AUTODETECT") {
+  //       try {
+  //         const modelNames = await llm.listModels();
+  //         const models = modelNames.map(
+  //           (modelName) =>
+  //             new CustomLLMClass({
+  //               ...desc,
+  //               options: { ...desc.options, model: modelName, writeLog },
+  //             }),
+  //         );
 
-          models.push(...models);
-        } catch (e) {
-          console.warn("Error listing models: ", e);
-        }
-      } else {
-        models.push(llm);
-      }
-    }
-  }
+  //         models.push(...models);
+  //       } catch (e) {
+  //         console.warn("Error listing models: ", e);
+  //       }
+  //     } else {
+  //       models.push(llm);
+  //     }
+  //   }
+  // }
 
   // Prepare models
-  for (const model of models) {
-    model.requestOptions = {
-      ...model.requestOptions,
-      ...config.requestOptions,
-    };
-  }
+  // for (const model of models) {
+  //   model.requestOptions = {
+  //     ...model.requestOptions,
+  //     ...config.requestOptions,
+  //   };
+  // }
 
-  if (allowFreeTrial) {
-    // Obtain auth token (iff free trial being used)
-    const freeTrialModels = models.filter(
-      (model) => model.providerName === "free-trial",
-    );
-    if (freeTrialModels.length > 0) {
-      const ghAuthToken = await ide.getGitHubAuthToken({});
-      for (const model of freeTrialModels) {
-        (model as FreeTrial).setupGhAuthToken(ghAuthToken);
-      }
-    }
-  } else {
-    // Remove free trial models
-    models = models.filter((model) => model.providerName !== "free-trial");
-  }
+  // if (allowFreeTrial) {
+  //   // Obtain auth token (iff free trial being used)
+  //   const freeTrialModels = models.filter(
+  //     (model) => model.providerName === "free-trial",
+  //   );
+  //   if (freeTrialModels.length > 0) {
+  //     const ghAuthToken = await ide.getGitHubAuthToken({});
+  //     for (const model of freeTrialModels) {
+  //       (model as FreeTrial).setupGhAuthToken(ghAuthToken);
+  //     }
+  //   }
+  // } else {
+  //   // Remove free trial models
+  //   models = models.filter((model) => model.providerName !== "free-trial");
+  // }
 
   // Tab autocomplete model
   let tabAutocompleteModels: BaseLLM[] = [];
@@ -351,16 +351,17 @@ async function intermediateToFinalConfig(
               ideSettings,
               writeLog,
               config.completionOptions,
-              config.systemMessage,
+              undefined,
             );
 
             if (llm?.providerName === "free-trial") {
-              if (!allowFreeTrial) {
-                // This shouldn't happen
-                throw new Error("Free trial cannot be used with control plane");
-              }
-              const ghAuthToken = await ide.getGitHubAuthToken({});
-              (llm as FreeTrial).setupGhAuthToken(ghAuthToken);
+              throw new Error("Free trial not available");
+              // if (!allowFreeTrial) {
+              //   // This shouldn't happen
+
+              // }
+              // const ghAuthToken = await ide.getGitHubAuthToken({});
+              // (llm as FreeTrial).setupGhAuthToken(ghAuthToken);
             }
             return llm;
           } else {
@@ -374,103 +375,103 @@ async function intermediateToFinalConfig(
   // These context providers are always included, regardless of what, if anything,
   // the user has configured in config.json
 
-  const codebaseContextParams =
-    (
-      (config.contextProviders || [])
-        .filter(isContextProviderWithParams)
-        .find((cp) => cp.name === "codebase") as
-      | ContextProviderWithParams
-      | undefined
-    )?.params || {};
-  const DEFAULT_CONTEXT_PROVIDERS = [
-    new FileContextProvider({}),
-    new CodebaseContextProvider(codebaseContextParams),
-  ];
+  // const codebaseContextParams =
+  //   (
+  //     (config.contextProviders || [])
+  //       .filter(isContextProviderWithParams)
+  //       .find((cp) => cp.name === "codebase") as
+  //     | ContextProviderWithParams
+  //     | undefined
+  //   )?.params || {};
+  // const DEFAULT_CONTEXT_PROVIDERS = [
+  //   new FileContextProvider({}),
+  //   new CodebaseContextProvider(codebaseContextParams),
+  // ];
 
-  const DEFAULT_CONTEXT_PROVIDERS_TITLES = DEFAULT_CONTEXT_PROVIDERS.map(
-    ({ description: { title } }) => title,
-  );
+  // const DEFAULT_CONTEXT_PROVIDERS_TITLES = DEFAULT_CONTEXT_PROVIDERS.map(
+  //   ({ description: { title } }) => title,
+  // );
 
   // Context providers
-  const contextProviders: IContextProvider[] = DEFAULT_CONTEXT_PROVIDERS;
+  // const contextProviders: IContextProvider[] = DEFAULT_CONTEXT_PROVIDERS;
 
-  for (const provider of config.contextProviders || []) {
-    if (isContextProviderWithParams(provider)) {
-      const cls = contextProviderClassFromName(provider.name) as any;
-      if (!cls) {
-        if (!DEFAULT_CONTEXT_PROVIDERS_TITLES.includes(provider.name)) {
-          console.warn(`Unknown context provider ${provider.name}`);
-        }
+  // for (const provider of config.contextProviders || []) {
+  //   if (isContextProviderWithParams(provider)) {
+  //     const cls = contextProviderClassFromName(provider.name) as any;
+  //     if (!cls) {
+  //       if (!DEFAULT_CONTEXT_PROVIDERS_TITLES.includes(provider.name)) {
+  //         console.warn(`Unknown context provider ${provider.name}`);
+  //       }
 
-        continue;
-      }
-      const instance: IContextProvider = new cls(provider.params);
+  //       continue;
+  //     }
+  //     const instance: IContextProvider = new cls(provider.params);
 
-      // Handle continue-proxy
-      if (instance.description.title === "continue-proxy") {
-        (instance as ContinueProxyContextProvider).workOsAccessToken =
-          workOsAccessToken;
-      }
+  //     // Handle continue-proxy
+  //     if (instance.description.title === "continue-proxy") {
+  //       (instance as ContinueProxyContextProvider).workOsAccessToken =
+  //         workOsAccessToken;
+  //     }
 
-      contextProviders.push(instance);
-    } else {
-      contextProviders.push(new CustomContextProviderClass(provider));
-    }
-  }
+  //     contextProviders.push(instance);
+  //   } else {
+  //     contextProviders.push(new CustomContextProviderClass(provider));
+  //   }
+  // }
 
   // Embeddings Provider
-  const embeddingsProviderDescription = config.embeddingsProvider as
-    | EmbeddingsProviderDescription
-    | undefined;
-  if (embeddingsProviderDescription?.provider) {
-    const { provider, ...options } = embeddingsProviderDescription;
-    const embeddingsProviderClass = allEmbeddingsProviders[provider];
-    if (embeddingsProviderClass) {
-      if (
-        embeddingsProviderClass.name === "_TransformersJsEmbeddingsProvider"
-      ) {
-        config.embeddingsProvider = new embeddingsProviderClass();
-      } else {
-        config.embeddingsProvider = new embeddingsProviderClass(
-          options,
-          (url: string | URL, init: any) =>
-            fetchwithRequestOptions(url, init, {
-              ...config.requestOptions,
-              ...options.requestOptions,
-            }),
-        );
-      }
-    }
-  }
+  // const embeddingsProviderDescription = config.embeddingsProvider as
+  //   | EmbeddingsProviderDescription
+  //   | undefined;
+  // if (embeddingsProviderDescription?.provider) {
+  //   const { provider, ...options } = embeddingsProviderDescription;
+  //   const embeddingsProviderClass = allEmbeddingsProviders[provider];
+  //   if (embeddingsProviderClass) {
+  //     if (
+  //       embeddingsProviderClass.name === "_TransformersJsEmbeddingsProvider"
+  //     ) {
+  //       config.embeddingsProvider = new embeddingsProviderClass();
+  //     } else {
+  //       config.embeddingsProvider = new embeddingsProviderClass(
+  //         options,
+  //         (url: string | URL, init: any) =>
+  //           fetchwithRequestOptions(url, init, {
+  //             ...config.requestOptions,
+  //             ...options.requestOptions,
+  //           }),
+  //       );
+  //     }
+  //   }
+  // }
 
-  if (!config.embeddingsProvider) {
-    config.embeddingsProvider = new TransformersJsEmbeddingsProvider();
-  }
+  // if (!config.embeddingsProvider) {
+  //   config.embeddingsProvider = new TransformersJsEmbeddingsProvider();
+  // }
 
   // Reranker
-  if (config.reranker && !(config.reranker as Reranker | undefined)?.rerank) {
-    const { name, params } = config.reranker as RerankerDescription;
-    const rerankerClass = AllRerankers[name];
+  // if (config.reranker && !(config.reranker as Reranker | undefined)?.rerank) {
+  //   const { name, params } = config.reranker as RerankerDescription;
+  //   const rerankerClass = AllRerankers[name];
 
-    if (name === "llm") {
-      const llm = models.find((model) => model.title === params?.modelTitle);
-      if (!llm) {
-        console.warn(`Unknown model ${params?.modelTitle}`);
-      } else {
-        config.reranker = new LLMReranker(llm);
-      }
-    } else if (rerankerClass) {
-      config.reranker = new rerankerClass(params);
-    }
-  }
+  //   if (name === "llm") {
+  //     const llm = models.find((model) => model.title === params?.modelTitle);
+  //     if (!llm) {
+  //       console.warn(`Unknown model ${params?.modelTitle}`);
+  //     } else {
+  //       config.reranker = new LLMReranker(llm);
+  //     }
+  //   } else if (rerankerClass) {
+  //     config.reranker = new rerankerClass(params);
+  //   }
+  // }
 
   return {
     ...config,
-    contextProviders,
-    models,
-    embeddingsProvider: config.embeddingsProvider as any,
+    // contextProviders,
+    // models,
+    // embeddingsProvider: config.embeddingsProvider as any,
     tabAutocompleteModels,
-    reranker: config.reranker as any,
+    // reranker: config.reranker as any,
   };
 }
 
@@ -479,20 +480,20 @@ function finalToBrowserConfig(
 ): BrowserSerializedContinueConfig {
   return {
     allowAnonymousTelemetry: final.allowAnonymousTelemetry,
-    models: final.models.map((m) => ({
-      provider: m.providerName,
-      model: m.model,
-      title: m.title ?? m.model,
-      apiKey: m.apiKey,
-      apiBase: m.apiBase,
-      contextLength: m.contextLength,
-      template: m.template,
-      completionOptions: m.completionOptions,
-      systemMessage: m.systemMessage,
-      requestOptions: m.requestOptions,
-      promptTemplates: m.promptTemplates as any,
-      capabilities: m.capabilities,
-    })),
+    // models: final.models.map((m) => ({
+    //   provider: m.providerName,
+    //   model: m.model,
+    //   title: m.title ?? m.model,
+    //   apiKey: m.apiKey,
+    //   apiBase: m.apiBase,
+    //   contextLength: m.contextLength,
+    //   template: m.template,
+    //   completionOptions: m.completionOptions,
+    //   systemMessage: m.systemMessage,
+    //   requestOptions: m.requestOptions,
+    //   promptTemplates: m.promptTemplates as any,
+    //   capabilities: m.capabilities,
+    // })),
     systemMessage: final.systemMessage,
     completionOptions: final.completionOptions,
     // slashCommands: final.slashCommands?.map((s) => ({
@@ -504,7 +505,7 @@ function finalToBrowserConfig(
     disableIndexing: final.disableIndexing,
     disableSessionTitles: final.disableSessionTitles,
     userToken: final.userToken,
-    embeddingsProvider: final.embeddingsProvider?.id,
+    // embeddingsProvider: final.embeddingsProvider?.id,
     ui: final.ui,
     experimental: final.experimental,
   };

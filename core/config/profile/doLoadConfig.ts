@@ -5,7 +5,7 @@ import {
   IdeSettings,
   SerializedContinueConfig,
 } from "../../";
-import { ContinueProxyReranker } from "../../context/rerankers/ContinueProxyReranker.js";
+// import { ContinueProxyReranker } from "../../context/rerankers/ContinueProxyReranker.js";
 import { ControlPlaneProxyInfo } from "../../control-plane/analytics/IAnalyticsProvider.js";
 import { ControlPlaneClient } from "../../control-plane/client.js";
 import { controlPlaneEnv } from "../../control-plane/env.js";
@@ -102,23 +102,25 @@ async function injectControlPlaneProxyInfo(
   config: ContinueConfig,
   info: ControlPlaneProxyInfo,
 ): Promise<ContinueConfig> {
-  [...config.models, ...(config.tabAutocompleteModels ?? [])].forEach(
-    async (model) => {
-      if (model.providerName === "continue-proxy") {
-        (model as ContinueProxy).controlPlaneProxyInfo = info;
-      }
-    },
-  );
+  [
+    // ...config.models,
+    ...(config.tabAutocompleteModels ?? [])].forEach(
+      async (model) => {
+        if (model.providerName === "continue-proxy") {
+          (model as ContinueProxy).controlPlaneProxyInfo = info;
+        }
+      },
+    );
 
-  if (config.embeddingsProvider?.providerName === "continue-proxy") {
-    (
-      config.embeddingsProvider as ContinueProxyEmbeddingsProvider
-    ).controlPlaneProxyInfo = info;
-  }
+  // if (config.embeddingsProvider?.providerName === "continue-proxy") {
+  //   (
+  //     config.embeddingsProvider as ContinueProxyEmbeddingsProvider
+  //   ).controlPlaneProxyInfo = info;
+  // }
 
-  if (config.reranker?.name === "continue-proxy") {
-    (config.reranker as ContinueProxyReranker).controlPlaneProxyInfo = info;
-  }
+  // if (config.reranker?.name === "continue-proxy") {
+  //   (config.reranker as ContinueProxyReranker).controlPlaneProxyInfo = info;
+  // }
 
   return config;
 }

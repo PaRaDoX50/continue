@@ -9,14 +9,14 @@ import {
   setupQuickstartConfig,
 } from "./config/onboarding";
 import { createNewPromptFile } from "./config/promptFile";
-import { addModel, addOpenAIKey, deleteModel } from "./config/util";
-import { recentlyEditedFilesCache } from "./context/retrieval/recentlyEditedFilesCache";
+// import { addModel, addOpenAIKey, deleteModel } from "./config/util";
+// import { recentlyEditedFilesCache } from "./context/retrieval/recentlyEditedFilesCache";
 import { ContinueServerClient } from "./continueServer/stubs/client";
 import { getAuthUrlForTokenPage } from "./control-plane/auth/index";
 import { ControlPlaneClient } from "./control-plane/client";
 import { streamDiffLines } from "./edit/streamDiffLines";
 import { CodebaseIndexer, PauseToken } from "./indexing/CodebaseIndexer";
-import DocsService from "./indexing/docs/DocsService";
+// import DocsService from "./indexing/docs/DocsService";
 import Ollama from "./llm/llms/Ollama";
 import type { FromCoreProtocol, ToCoreProtocol } from "./protocol";
 import { GlobalContext } from "./util/GlobalContext";
@@ -38,7 +38,7 @@ export class Core {
   continueServerClientPromise: Promise<ContinueServerClient>;
   indexingState: IndexingProgressUpdate;
   controlPlaneClient: ControlPlaneClient;
-  private docsService: DocsService;
+  // private docsService: DocsService;
   private globalContext = new GlobalContext();
 
   private readonly indexingPauseToken = new PauseToken(
@@ -53,9 +53,9 @@ export class Core {
     return this.configHandler.loadConfig();
   }
 
-  private async getSelectedModel() {
-    return await this.configHandler.llmFromTitle(this.selectedModelTitle);
-  }
+  // private async getSelectedModel() {
+  //   return await this.configHandler.llmFromTitle(this.selectedModelTitle);
+  // }
 
   invoke<T extends keyof ToCoreProtocol>(
     messageType: T,
@@ -95,11 +95,11 @@ export class Core {
       this.controlPlaneClient,
     );
 
-    this.docsService = DocsService.createSingleton(
-      this.configHandler,
-      this.ide,
-      this.messenger,
-    );
+    // this.docsService = DocsService.createSingleton(
+    //   this.configHandler,
+    //   this.ide,
+    //   this.messenger,
+    // );
 
     this.configHandler.onConfigUpdate(
       (() => this.messenger.send("configUpdate", undefined)).bind(this),
@@ -137,19 +137,19 @@ export class Core {
       );
 
       // Index on initialization
-      void this.ide.getWorkspaceDirs().then(async (dirs) => {
-        // Respect pauseCodebaseIndexOnStart user settings
-        if (ideSettings.pauseCodebaseIndexOnStart) {
-          await this.messenger.request("indexProgress", {
-            progress: 1,
-            desc: "Initial Indexing Skipped",
-            status: "paused",
-          });
-          return;
-        }
+      // void this.ide.getWorkspaceDirs().then(async (dirs) => {
+      //   // Respect pauseCodebaseIndexOnStart user settings
+      //   if (ideSettings.pauseCodebaseIndexOnStart) {
+      //     await this.messenger.request("indexProgress", {
+      //       progress: 1,
+      //       desc: "Initial Indexing Skipped",
+      //       status: "paused",
+      //     });
+      //     return;
+      //   }
 
-        void this.refreshCodebaseIndex(dirs);
-      });
+      //   void this.refreshCodebaseIndex(dirs);
+      // });
     });
 
     const getLlm = async () => {
@@ -225,21 +225,21 @@ export class Core {
     });
 
     // Edit config
-    on("config/addModel", (msg) => {
-      const model = msg.data.model;
-      addModel(model, msg.data.role);
-      void this.configHandler.reloadConfig();
-    });
+    // on("config/addModel", (msg) => {
+    //   const model = msg.data.model;
+    //   addModel(model, msg.data.role);
+    //   void this.configHandler.reloadConfig();
+    // });
 
-    on("config/addOpenAiKey", (msg) => {
-      addOpenAIKey(msg.data);
-      void this.configHandler.reloadConfig();
-    });
+    // on("config/addOpenAiKey", (msg) => {
+    //   addOpenAIKey(msg.data);
+    //   void this.configHandler.reloadConfig();
+    // });
 
-    on("config/deleteModel", (msg) => {
-      deleteModel(msg.data.title);
-      void this.configHandler.reloadConfig();
-    });
+    // on("config/deleteModel", (msg) => {
+    //   deleteModel(msg.data.title);
+    //   void this.configHandler.reloadConfig();
+    // });
 
     on("config/newPromptFile", async (msg) => {
       void createNewPromptFile(
@@ -262,36 +262,36 @@ export class Core {
     });
 
     // Context providers
-    on("context/addDocs", async (msg) => {
-      let hasFailed = false;
+    // on("context/addDocs", async (msg) => {
+    //   let hasFailed = false;
 
-      for await (const result of this.docsService.indexAndAdd(msg.data)) {
-        if (result.status === "failed") {
-          hasFailed = true;
-          break;
-        }
-      }
+    //   for await (const result of this.docsService.indexAndAdd(msg.data)) {
+    //     if (result.status === "failed") {
+    //       hasFailed = true;
+    //       break;
+    //     }
+    //   }
 
-      if (hasFailed) {
-        void this.ide.showToast("info", `Failed to index ${msg.data.startUrl}`);
-      } else {
-        void this.ide.showToast(
-          "info",
-          `Successfully indexed ${msg.data.startUrl}`,
-        );
-        this.messenger.send("refreshSubmenuItems", undefined);
-      }
-    });
+    //   if (hasFailed) {
+    //     void this.ide.showToast("info", `Failed to index ${msg.data.startUrl}`);
+    //   } else {
+    //     void this.ide.showToast(
+    //       "info",
+    //       `Successfully indexed ${msg.data.startUrl}`,
+    //     );
+    //     this.messenger.send("refreshSubmenuItems", undefined);
+    //   }
+    // });
 
-    on("context/removeDocs", async (msg) => {
-      await this.docsService.delete(msg.data.startUrl);
-      this.messenger.send("refreshSubmenuItems", undefined);
-    });
+    // on("context/removeDocs", async (msg) => {
+    //   await this.docsService.delete(msg.data.startUrl);
+    //   this.messenger.send("refreshSubmenuItems", undefined);
+    // });
 
-    on("context/indexDocs", async (msg) => {
-      await this.docsService.indexAllDocs(msg.data.reIndex);
-      this.messenger.send("refreshSubmenuItems", undefined);
-    });
+    // on("context/indexDocs", async (msg) => {
+    //   await this.docsService.indexAllDocs(msg.data.reIndex);
+    //   this.messenger.send("refreshSubmenuItems", undefined);
+    // });
 
     on("context/loadSubmenuItems", async (msg) => {
       const config = await this.config();
@@ -306,55 +306,55 @@ export class Core {
       return items || [];
     });
 
-    on("context/getContextItems", async (msg) => {
-      const { name, query, fullInput, selectedCode } = msg.data;
-      const config = await this.config();
-      const llm = await this.getSelectedModel();
-      const provider = config.contextProviders?.find(
-        (provider) => provider.description.title === name,
-      );
-      if (!provider) {
-        return [];
-      }
+    // on("context/getContextItems", async (msg) => {
+    //   const { name, query, fullInput, selectedCode } = msg.data;
+    //   const config = await this.config();
+    //   const llm = await this.getSelectedModel();
+    //   const provider = config.contextProviders?.find(
+    //     (provider) => provider.description.title === name,
+    //   );
+    //   if (!provider) {
+    //     return [];
+    //   }
 
-      try {
-        const id: ContextItemId = {
-          providerTitle: provider.description.title,
-          itemId: uuidv4(),
-        };
+    //   try {
+    //     const id: ContextItemId = {
+    //       providerTitle: provider.description.title,
+    //       itemId: uuidv4(),
+    //     };
 
-        const items = await provider.getContextItems(query, {
-          config,
-          llm,
-          embeddingsProvider: config.embeddingsProvider,
-          fullInput,
-          ide,
-          selectedCode,
-          reranker: config.reranker,
-          fetch: (url, init) =>
-            fetchwithRequestOptions(url, init, config.requestOptions),
-        });
+    //     const items = await provider.getContextItems(query, {
+    //       config,
+    //       llm,
+    //       embeddingsProvider: config.embeddingsProvider,
+    //       fullInput,
+    //       ide,
+    //       selectedCode,
+    //       reranker: config.reranker,
+    //       fetch: (url, init) =>
+    //         fetchwithRequestOptions(url, init, config.requestOptions),
+    //     });
 
-        void Telemetry.capture(
-          "useContextProvider",
-          {
-            name: provider.description.title,
-          },
-          true,
-        );
+    //     void Telemetry.capture(
+    //       "useContextProvider",
+    //       {
+    //         name: provider.description.title,
+    //       },
+    //       true,
+    //     );
 
-        return items.map((item) => ({
-          ...item,
-          id,
-        }));
-      } catch (e) {
-        void this.ide.showToast(
-          "error",
-          `Error getting context items from ${name}: ${e}`,
-        );
-        return [];
-      }
-    });
+    //     return items.map((item) => ({
+    //       ...item,
+    //       id,
+    //     }));
+    //   } catch (e) {
+    //     void this.ide.showToast(
+    //       "error",
+    //       `Error getting context items from ${name}: ${e}`,
+    //     );
+    //     return [];
+    //   }
+    // });
 
     on("config/getSerializedProfileInfo", async (msg) => {
       return {
@@ -363,118 +363,118 @@ export class Core {
       };
     });
 
-    async function* llmStreamChat(
-      configHandler: ConfigHandler,
-      abortedMessageIds: Set<string>,
-      msg: Message<ToCoreProtocol["llm/streamChat"][0]>,
-    ) {
-      const config = await configHandler.loadConfig();
+    // async function* llmStreamChat(
+    //   configHandler: ConfigHandler,
+    //   abortedMessageIds: Set<string>,
+    //   msg: Message<ToCoreProtocol["llm/streamChat"][0]>,
+    // ) {
+    //   const config = await configHandler.loadConfig();
 
-      // Stop TTS on new StreamChat
-      if (config.experimental?.readResponseTTS) {
-        void TTS.kill();
-      }
+    //   // Stop TTS on new StreamChat
+    //   if (config.experimental?.readResponseTTS) {
+    //     void TTS.kill();
+    //   }
 
-      const model = await configHandler.llmFromTitle(msg.data.title);
-      const gen = model.streamChat(
-        msg.data.messages,
-        msg.data.completionOptions,
-      );
-      let next = await gen.next();
-      while (!next.done) {
-        if (abortedMessageIds.has(msg.messageId)) {
-          abortedMessageIds.delete(msg.messageId);
-          next = await gen.return({
-            modelTitle: model.title ?? model.model,
-            completion: "",
-            prompt: "",
-            completionOptions: {
-              ...msg.data.completionOptions,
-              model: model.model,
-            },
-          });
-          break;
-        }
-        yield { content: next.value.content };
-        next = await gen.next();
-      }
+    //   const model = await configHandler.llmFromTitle(msg.data.title);
+    //   const gen = model.streamChat(
+    //     msg.data.messages,
+    //     msg.data.completionOptions,
+    //   );
+    //   let next = await gen.next();
+    //   while (!next.done) {
+    //     if (abortedMessageIds.has(msg.messageId)) {
+    //       abortedMessageIds.delete(msg.messageId);
+    //       next = await gen.return({
+    //         modelTitle: model.title ?? model.model,
+    //         completion: "",
+    //         prompt: "",
+    //         completionOptions: {
+    //           ...msg.data.completionOptions,
+    //           model: model.model,
+    //         },
+    //       });
+    //       break;
+    //     }
+    //     yield { content: next.value.content };
+    //     next = await gen.next();
+    //   }
 
-      if (config.experimental?.readResponseTTS && "completion" in next.value) {
-        void TTS.read(next.value?.completion);
-      }
-      return { done: true, content: next.value };
-    }
+    //   if (config.experimental?.readResponseTTS && "completion" in next.value) {
+    //     void TTS.read(next.value?.completion);
+    //   }
+    //   return { done: true, content: next.value };
+    // }
 
-    on("llm/streamChat", (msg) =>
-      llmStreamChat(this.configHandler, this.abortedMessageIds, msg),
-    );
+    // on("llm/streamChat", (msg) =>
+    //   llmStreamChat(this.configHandler, this.abortedMessageIds, msg),
+    // );
 
-    async function* llmStreamComplete(
-      configHandler: ConfigHandler,
-      abortedMessageIds: Set<string>,
+    // async function* llmStreamComplete(
+    //   configHandler: ConfigHandler,
+    //   abortedMessageIds: Set<string>,
 
-      msg: Message<ToCoreProtocol["llm/streamComplete"][0]>,
-    ) {
-      const model = await configHandler.llmFromTitle(msg.data.title);
-      const gen = model.streamComplete(
-        msg.data.prompt,
-        msg.data.completionOptions,
-      );
-      let next = await gen.next();
-      while (!next.done) {
-        if (abortedMessageIds.has(msg.messageId)) {
-          abortedMessageIds.delete(msg.messageId);
-          next = await gen.return({
-            modelTitle: model.title ?? model.model,
-            completion: "",
-            prompt: "",
-            completionOptions: {
-              ...msg.data.completionOptions,
-              model: model.model,
-            },
-          });
-          break;
-        }
-        yield { content: next.value };
-        next = await gen.next();
-      }
+    //   msg: Message<ToCoreProtocol["llm/streamComplete"][0]>,
+    // ) {
+    //   const model = await configHandler.llmFromTitle(msg.data.title);
+    //   const gen = model.streamComplete(
+    //     msg.data.prompt,
+    //     msg.data.completionOptions,
+    //   );
+    //   let next = await gen.next();
+    //   while (!next.done) {
+    //     if (abortedMessageIds.has(msg.messageId)) {
+    //       abortedMessageIds.delete(msg.messageId);
+    //       next = await gen.return({
+    //         modelTitle: model.title ?? model.model,
+    //         completion: "",
+    //         prompt: "",
+    //         completionOptions: {
+    //           ...msg.data.completionOptions,
+    //           model: model.model,
+    //         },
+    //       });
+    //       break;
+    //     }
+    //     yield { content: next.value };
+    //     next = await gen.next();
+    //   }
 
-      return { done: true, content: next.value };
-    }
+    //   return { done: true, content: next.value };
+    // }
 
-    on("llm/streamComplete", (msg) =>
-      llmStreamComplete(this.configHandler, this.abortedMessageIds, msg),
-    );
+    // on("llm/streamComplete", (msg) =>
+    //   llmStreamComplete(this.configHandler, this.abortedMessageIds, msg),
+    // );
 
-    on("llm/complete", async (msg) => {
-      const model = await this.configHandler.llmFromTitle(msg.data.title);
-      const completion = await model.complete(
-        msg.data.prompt,
-        msg.data.completionOptions,
-      );
-      return completion;
-    });
-    on("llm/listModels", async (msg) => {
-      const config = await this.configHandler.loadConfig();
-      const model =
-        config.models.find((model) => model.title === msg.data.title) ??
-        config.models.find((model) => model.title?.startsWith(msg.data.title));
-      try {
-        if (model) {
-          return model.listModels();
-        } else {
-          if (msg.data.title === "Ollama") {
-            const models = await new Ollama({ model: "" }).listModels();
-            return models;
-          } else {
-            return undefined;
-          }
-        }
-      } catch (e) {
-        console.debug(`Error listing Ollama models: ${e}`);
-        return undefined;
-      }
-    });
+    // on("llm/complete", async (msg) => {
+    //   const model = await this.configHandler.llmFromTitle(msg.data.title);
+    //   const completion = await model.complete(
+    //     msg.data.prompt,
+    //     msg.data.completionOptions,
+    //   );
+    //   return completion;
+    // });
+    // on("llm/listModels", async (msg) => {
+    //   const config = await this.configHandler.loadConfig();
+    //   const model =
+    //     config.models.find((model) => model.title === msg.data.title) ??
+    //     config.models.find((model) => model.title?.startsWith(msg.data.title));
+    //   try {
+    //     if (model) {
+    //       return model.listModels();
+    //     } else {
+    //       if (msg.data.title === "Ollama") {
+    //         const models = await new Ollama({ model: "" }).listModels();
+    //         return models;
+    //       } else {
+    //         return undefined;
+    //       }
+    //     }
+    //   } catch (e) {
+    //     console.debug(`Error listing Ollama models: ${e}`);
+    //     return undefined;
+    //   }
+    // });
 
     // Provide messenger to utils so they can interact with GUI + state
     TTS.messenger = this.messenger;
@@ -484,10 +484,10 @@ export class Core {
       void TTS.kill();
     });
 
-    on("chatDescriber/describe", async (msg) => {
-      const currentModel = await this.getSelectedModel();
-      return await ChatDescriber.describe(currentModel, {}, msg.data);
-    });
+    // on("chatDescriber/describe", async (msg) => {
+    //   const currentModel = await this.getSelectedModel();
+    //   return await ChatDescriber.describe(currentModel, {}, msg.data);
+    // });
 
     // async function* runNodeJsSlashCommand(
     //   configHandler: ConfigHandler,
@@ -584,35 +584,35 @@ export class Core {
       this.completionProvider.cancel();
     });
 
-    async function* streamDiffLinesGenerator(
-      configHandler: ConfigHandler,
-      abortedMessageIds: Set<string>,
-      msg: Message<ToCoreProtocol["streamDiffLines"][0]>,
-    ) {
-      const data = msg.data;
-      const llm = await configHandler.llmFromTitle(msg.data.modelTitle);
-      for await (const diffLine of streamDiffLines(
-        data.prefix,
-        data.highlighted,
-        data.suffix,
-        llm,
-        data.input,
-        data.language,
-      )) {
-        if (abortedMessageIds.has(msg.messageId)) {
-          abortedMessageIds.delete(msg.messageId);
-          break;
-        }
-        console.log(diffLine);
-        yield { content: diffLine };
-      }
+    // async function* streamDiffLinesGenerator(
+    //   configHandler: ConfigHandler,
+    //   abortedMessageIds: Set<string>,
+    //   msg: Message<ToCoreProtocol["streamDiffLines"][0]>,
+    // ) {
+    //   const data = msg.data;
+    //   const llm = await configHandler.llmFromTitle(msg.data.modelTitle);
+    //   for await (const diffLine of streamDiffLines(
+    //     data.prefix,
+    //     data.highlighted,
+    //     data.suffix,
+    //     llm,
+    //     data.input,
+    //     data.language,
+    //   )) {
+    //     if (abortedMessageIds.has(msg.messageId)) {
+    //       abortedMessageIds.delete(msg.messageId);
+    //       break;
+    //     }
+    //     console.log(diffLine);
+    //     yield { content: diffLine };
+    //   }
 
-      return { done: true };
-    }
+    //   return { done: true };
+    // }
 
-    on("streamDiffLines", (msg) =>
-      streamDiffLinesGenerator(this.configHandler, this.abortedMessageIds, msg),
-    );
+    // on("streamDiffLines", (msg) =>
+    //   streamDiffLinesGenerator(this.configHandler, this.abortedMessageIds, msg),
+    // );
 
     on("completeOnboarding", (msg) => {
       const mode = msg.data.mode;
@@ -668,15 +668,15 @@ export class Core {
       const rows = await DevDataSqliteDb.getTokensPerModel();
       return rows;
     });
-    on("index/forceReIndex", async ({ data }) => {
-      if (data?.shouldClearIndexes) {
-        const codebaseIndexer = await this.codebaseIndexerPromise;
-        await codebaseIndexer.clearIndexes();
-      }
+    // on("index/forceReIndex", async ({ data }) => {
+    //   if (data?.shouldClearIndexes) {
+    //     const codebaseIndexer = await this.codebaseIndexerPromise;
+    //     await codebaseIndexer.clearIndexes();
+    //   }
 
-      const dirs = data?.dir ? [data.dir] : await this.ide.getWorkspaceDirs();
-      await this.refreshCodebaseIndex(dirs);
-    });
+    //   const dirs = data?.dir ? [data.dir] : await this.ide.getWorkspaceDirs();
+    //   await this.refreshCodebaseIndex(dirs);
+    // });
     on("index/setPaused", (msg) => {
       new GlobalContext().update("indexingPaused", msg.data);
       this.indexingPauseToken.paused = msg.data;
@@ -701,48 +701,48 @@ export class Core {
       return { url };
     });
 
-    on("didChangeActiveTextEditor", ({ data: { filepath } }) => {
-      recentlyEditedFilesCache.set(filepath, filepath);
-    });
-  }
+    //   on("didChangeActiveTextEditor", ({ data: { filepath } }) => {
+    //     recentlyEditedFilesCache.set(filepath, filepath);
+    //   });
+    // }
 
-  private indexingCancellationController: AbortController | undefined;
+    // private indexingCancellationController: AbortController | undefined;
 
-  private async refreshCodebaseIndex(dirs: string[]) {
-    if (this.indexingCancellationController) {
-      this.indexingCancellationController.abort();
-    }
-    this.indexingCancellationController = new AbortController();
-    for await (const update of (await this.codebaseIndexerPromise).refresh(
-      dirs,
-      this.indexingCancellationController.signal,
-    )) {
-      let updateToSend = { ...update };
-      if (update.status === "failed") {
-        updateToSend.status = "done";
-        updateToSend.desc = "Indexing complete";
-        updateToSend.progress = 1.0;
-      }
+    // private async refreshCodebaseIndex(dirs: string[]) {
+    //   if (this.indexingCancellationController) {
+    //     this.indexingCancellationController.abort();
+    //   }
+    //   this.indexingCancellationController = new AbortController();
+    //   for await (const update of (await this.codebaseIndexerPromise).refresh(
+    //     dirs,
+    //     this.indexingCancellationController.signal,
+    //   )) {
+    //     let updateToSend = { ...update };
+    //     if (update.status === "failed") {
+    //       updateToSend.status = "done";
+    //       updateToSend.desc = "Indexing complete";
+    //       updateToSend.progress = 1.0;
+    //     }
 
-      void this.messenger.request("indexProgress", updateToSend);
-      this.indexingState = updateToSend;
+    //     void this.messenger.request("indexProgress", updateToSend);
+    //     this.indexingState = updateToSend;
 
-      if (update.status === "failed") {
-        console.debug(
-          "Indexing failed with error: ",
-          update.desc,
-          update.debugInfo,
-        );
-        void Telemetry.capture(
-          "indexing_error",
-          {
-            error: update.desc,
-            stack: update.debugInfo,
-          },
-          false,
-        );
-      }
-    }
+    //     if (update.status === "failed") {
+    //       console.debug(
+    //         "Indexing failed with error: ",
+    //         update.desc,
+    //         update.debugInfo,
+    //       );
+    //       void Telemetry.capture(
+    //         "indexing_error",
+    //         {
+    //           error: update.desc,
+    //           stack: update.debugInfo,
+    //         },
+    //         false,
+    //       );
+    //     }
+    //   }
 
     this.messenger.send("refreshSubmenuItems", undefined);
   }

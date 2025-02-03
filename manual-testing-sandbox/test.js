@@ -34,5 +34,4 @@ getBadgeProgress(String badgeId) {
     });
 }
 
-  
 }
